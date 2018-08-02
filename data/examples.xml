@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<examples>
+    <example>
+        <title>Add and Edit Triples</title>
+        <document-name>editTriplesTest.xml</document-name>
+        <group>1</group>
+        <description/>
+    </example>
+</examples>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <uid>admin</uid>
+    <pwd>sasadm1n</pwd>
+    <sparqlupdate>http://localhost:3030/ds/update</sparqlupdate>
+    <sparqlquery>http://localhost:3030/ds/query</sparqlquery>
+</config>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <title>Triples Entry Test Form </title>
+        <xf:model id="mainModel">
+            <xf:instance id="isearch">
+                <root xmlns="">
+                    <srch>
+                        <subject/>
+                        <pred/>
+                        <object/>
+                    </srch>
+                </root>
+            </xf:instance>
+            <xf:instance id="iresults">
+                <root xmlns=""/>
+            </xf:instance>
+            <xf:instance id="iresults2">
+                <root xmlns=""/>
+            </xf:instance>
+            <xf:instance id="triples">
+                <root xmlns="">
+                    <triples>
+                        <uid/>
+                    </triples>
+                </root>
+            </xf:instance>
+            <xf:instance id="preds">
+                <predicates xmlns="">
+                    <pred/>
+                    <pred>Is (a)</pred>
+                    <pred>(has) Strong similarity (to)</pred>
+                    <pred>(has) common Elements (with)</pred>
+                    <pred>(has) Peripheral Interest (to)</pred>
+                    <pred>Is not</pred>
+                    <pred>Is (a) key part (of)</pred>
+                    <pred>(is a) commitment (of)</pred>
+                    <pred>Endorsed</pred>
+                    <pred>Informed</pred>
+                    <pred>Approved</pred>
+                    <pred>Has RAG Status</pred>
+                    <pred>Is needed to deliver</pred>
+                    <pred>Spotlight</pred>
+                </predicates>
+            </xf:instance>
+            <xf:instance xmlns="" id="authuser">
+                <root>
+                    <uid/>
+                </root>
+            </xf:instance>
+            <xf:instance xmlns="" id="response">
+                <root>
+                    <message/>
+                </root>
+            </xf:instance>
+            <xf:bind nodeset="search" constraint="instance('iresults')//s[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = translate(current(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')]"/>
+            <xf:submission id="s1" method="get" replace="instance" instance="iresults" serialization="none" mode="synchronous" mediatype="application/xml" separator="&amp;">
+                <xf:resource value="concat('/exist/apps/snapsec/modules/get-suggestions.xql?search=',instance('isearch')/srch/subject,'&amp;t=',substring(string(digest( string(random(true()) ), 'MD5', 'hex' )), 1, 8))"/>
+            </xf:submission>
+            <xf:submission id="s2" method="get" replace="instance" instance="iresults2" serialization="none" mode="synchronous" mediatype="application/xml" separator="&amp;">
+                <xf:resource value="concat('/exist/apps/snapsec/modules/get-suggestions.xql?search=',instance('isearch')/srch/object,'&amp;t=',substring(string(digest( string( random(true()) ), 'MD5', 'hex' )), 1, 8))"/>
+            </xf:submission>
+            <xf:submission id="save" method="post" action="save.xq" ref="instance('triples')" instance="response" replace="instance">
+                <xf:message level="modeless" ev:event="xforms-submit-error">Submit Error</xf:message>
+                <xf:toggle case="save-done" ev:event="xforms-submit-done"/>
+                <xf:refresh event="xforms-submit-done" model="mainModel"/>
+            </xf:submission>
+            <xf:submission id="auth-user-submission" method="get" action="/exist/apps/snapsec/modules/userInfo.xql" validate="false" relevant="false" replace="instance" instance="authuser">
+                <xf:action ev:event="xforms-submit-done">
+                    <xf:message>Authenticated User: <xf:output value="instance('authuser')/uid"/>
+                    </xf:message>
+                    <xf:send submission="load-triples-submission"/>
+                </xf:action>
+                <xf:action ev:event="xforms-submit-error">
+                    <xf:message>Submit Error! Resource-uri: <xf:output value="event('resource-uri')"/>
+                Response-reason-phrase: <xf:output value="event('response-reason-phrase')"/>
+                    </xf:message>
+                </xf:action>
+            </xf:submission>
+            <xf:submission id="load-triples-submission" method="get" validate="false" relevant="false" replace="instance" instance="triples">
+                <xf:resource value="concat('/exist/rest/db/datasets/snap/data/triples/', instance('authuser')/uid, '.xml','?t=',substring(string(digest( string(random(true())), 'MD5', 'hex' )), 1, 8))"/>
+                <xf:action ev:event="xforms-submit-done">
+                    <xf:message>Load of triples done</xf:message>
+                    <xf:setvalue ref="instance('triples')//uid" value="instance('authuser')/uid"/>
+                </xf:action>
+                <xf:action ev:event="xforms-submit-error">
+                    <xf:message>Submit Error! Resource-uri: <xf:output value="event('resource-uri')"/>
+                Response-reason-phrase: <xf:output value="event('response-reason-phrase')"/>
+                    </xf:message>
+                </xf:action>
+            </xf:submission>
+            <xf:setfocus ev:event="xforms-ready" control="search"/>
+            <xf:action ev:event="xforms-ready">
+                <xf:send submission="auth-user-submission"/>
+            </xf:action>
+ 
+ <!--             <xf:action ev:observer="save" ev:event="xforms-submit">
+                <xf:setvalue ref="instance('triples')/uid" value="instance('authuser')/uid"/>
+            </xf:action>
+ -->
+        </xf:model>
+        <style type="text/css">
+            @namespace xf url("http://www.w3.org/2002/xforms");
+            body {font-family: sans-serif; font-size: 10pt;
+            background-color: ivory;}
+            #search label { width: 4em; }
+            #results { border:1px solid black; width: 20em; margin-left: 10.5em; max-height:5em; overflow:auto; }
+            #results .xforms-value:hover { background-color: #418ad5; z-index: 90;}
+            #search2 label {  width: 4em;}
+            #results2{ border:1px solid black; width: 20em; margin-left: 10.5em; max-height:5em; overflow:auto; }
+            #results2 .xforms-value:hover { background-color: #418ad5; z-index: 90; }
+            #addTriplesButton {float:right}
+            .toolbar {display: none;}
+            .xforms-repeat {overflow:auto;}
+            
+            
+            input {width:25em;}
+           // *::repeat-index  { background-color: teal; }
+            
+            
+            table {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            }
+            
+            #inpTable {
+            width: 70%;
+            background-color:lightblue;
+            border: 1px solid black;
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            align:center;
+            }
+            
+            tr {height:7em;}
+            
+            th {
+            color: white;
+            background-color: black;
+            }
+            
+            td {
+            border: solid black 1px;
+            padding: 2px;
+            text-align: left;
+            vertical-align:top;
+            overflow:auto;
+            height:3em;
+            }
+            
+         //   .xforms-repeat-index {
+         //   background-color: red;
+         //   }
+            
+            #list {
+            font-size: 9pt;
+            height: 160px;
+            width:85%;
+            overflow:auto;
+            }
+            
+            #triples-output .xforms-value:hover { background-color: red; }
+            
+            #triples-output .xforms-repeat-index { background-color: blue; }
+            
+            #triples-output .xforms-repeat-item-selected {background-color: yellow;} 
+            
+           // #list {font-size: 9pt;}
+                    
+        </style>
+        <script type="text/javascript">      
+        // adding a gmail style function to stop the user from moving away from the page..
+        function unloadMessage(){message = "This form has not yet been submitted to the database\nAll data will be lost."
+         return message;}
+        function setBunload(on){window.onbeforeunload = (on) ? unloadMessage : null;}
+        setBunload(true);
+        function dirty() {
+            setBunload(true);
+        }
+        function clean() {
+            setBunload(false);
+        }
+        </script>
+    </head>
+    <body>
+        <div>
+            <a href="../index.html">Home</a>
+            <h3> Triples Entry Form v0.11 [2015-02-20]:  (<xf:output ref="instance('authuser')//uid"/>)</h3>
+        </div>
+        <p>Please enter a subject, relationship and object in the following fields, then enter with the Add Triple button. The added items will then appear below.</p>
+        <table id="inpTable">
+            <caption>Add Triples Here</caption>
+            <tr>
+                <td class="inp">
+                    <xf:input id="search" ref="instance('isearch')/srch/subject" incremental="true" delay="500">
+                        <xf:label>
+                            <b>Subject</b>&#160;<i>aka Thing 1</i>: </xf:label>
+                        <xf:send submission="s1" ev:event="xforms-value-changed"/>
+                        <xf:toggle ev:event="DOMFocusIn" case="show-autocompletion"/>
+                    </xf:input>
+                    <xf:switch>
+                        <xf:case id="show-autocompletion">
+                            <xf:repeat id="results" nodeset="instance('iresults')//s">
+                                <xf:trigger appearance="minimal">
+                                    <xf:label>
+                                        <xf:output value="."/>
+                                    </xf:label>
+                                    <xf:action ev:event="DOMActivate">
+                                        <xf:setvalue ref="instance('isearch')/srch/subject" value="instance('iresults')//s[index('results')]"/>
+                                        <xf:toggle case="hide-autocompletion"/>
+                                    </xf:action>
+                                </xf:trigger>
+                            </xf:repeat>
+                        </xf:case>
+                        <xf:case id="hide-autocompletion"/>
+                    </xf:switch>
+                </td>
+            </tr>
+            <tr>
+                <td class="inp">
+                    <xf:select1 id="select-pred" appearance="minimal" ref="instance('isearch')/srch/pred">
+                        <xf:label id="predicate">
+                            <b>Predicate</b>&#160;<i>aka Relationship:</i>
+                        </xf:label>
+                        <xf:hint>Choose your Relationship</xf:hint>
+                        <xf:itemset nodeset="instance('preds')/pred">
+                            <xf:label ref="."/>
+                            <xf:value ref="."/>
+                        </xf:itemset>
+                    </xf:select1>
+                </td>
+            </tr>
+            <tr>
+                <td class="inp">
+                    <xf:input id="search2" ref="instance('isearch')/srch/object" incremental="true" delay="500">
+                        <xf:label>
+                            <b>Object</b>&#160;<i>aka Thing 2:</i>
+                        </xf:label>
+                        <xf:send submission="s2" ev:event="xforms-value-changed"/>
+                        <xf:toggle ev:event="DOMFocusIn" case="show-autocompletion2"/>
+                    </xf:input>
+                    <xf:switch>
+                        <xf:case id="show-autocompletion2">
+                            <xf:repeat id="results2" nodeset="instance('iresults2')//s">
+                                <xf:trigger appearance="minimal">
+                                    <xf:label>
+                                        <xf:output value="."/>
+                                    </xf:label>
+                                    <xf:action ev:event="DOMActivate">
+                                        <xf:setvalue ref="instance('isearch')/srch/object" value="instance('iresults2')//s[index('results2')]"/>
+                                        <xf:toggle case="hide-autocompletion2"/>
+                                    </xf:action>
+                                </xf:trigger>
+                            </xf:repeat>
+                        </xf:case>
+                        <xf:case id="hide-autocompletion2"/>
+                    </xf:switch>
+                </td>
+            </tr>
+            <tr>
+                <td class="inp">
+                    <xf:trigger id="addTriplesButton" appearance="xf:image">
+                        <img src="/exist/apps/snap/resources/images/button_OK.jpg"/>
+                        <xf:label>Add Triple</xf:label>
+                        <xf:action ev:event="DOMActivate">
+                            <xf:insert origin="instance('isearch')/srch" nodeset="instance('triples')/triples/*"/>
+                            <xf:setvalue ref="instance('isearch')/srch/subject" value=""/>
+                            <xf:setvalue ref="instance('isearch')/srch/pred" value=""/>
+                            <xf:setvalue ref="instance('isearch')/srch/object" value=""/>
+                            <xf:send submission="save"/>
+                        </xf:action>
+                    </xf:trigger>
+                </td>
+            </tr>
+        </table>
+        <hr/>
+        <div>
+            <b>Before you leave this page</b> you need to review and save all the Triples you have made today</div>
+        <div>You can see a table/list of all Triples you have made  here. <br/>You can delete unwanted triples by selecting the triple and then clicking the <b>Delete Selected Row</b> button</div>
+        <div>...............................................................................</div>
+        <div id="list">
+            <xf:repeat id="triples-output" nodeset="instance('triples')//srch">
+                <xf:output value="position()"/>
+                <xf:output ref="./subject"/>  ➡ <xf:output ref="./pred"/> ➡ <xf:output ref="./object"/>
+            </xf:repeat>
+        </div>
+        <div>...............................................................................</div>
+        <div>
+            <xf:output value="index('triples-output')">
+                <xf:label>Selected Row= </xf:label>
+            </xf:output>
+            &#160;&#160;&#160;&#160;
+            <xf:trigger>
+                <xf:label>Delete Selected Row</xf:label>
+                <xf:action ev:event="DOMActivate">
+                    <xf:delete nodeset="instance('triples')//srch" at="index('triples-output')"/>
+                </xf:action>
+            </xf:trigger>
+        </div>
+        <div style="align:right;">
+            <xf:submit submission="save" appearance="full">
+                <xf:label>Save Triples</xf:label>
+            </xf:submit>
+            <xf:trigger>
+                <xf:label>Refresh</xf:label>
+                <xf:action ev:event="DOMActivate">
+                    <xf:refresh model="mainModel"/>
+                </xf:action>
+            </xf:trigger>
+        </div>
+        <xf:switch>
+            <xf:case id="save-done" resource="javascript:clean();">
+                <xf:output ref="instance('response')" mediatype="text/html"/>
+            </xf:case>
+        </xf:switch>
+        <p>View <a href="/exist/apps/mysec/templates/relation-browser-template.html" target="_relB">relation browser</a> for all triples</p>
+        <p>View <a href="/exist/apps/mysec/templates/relation-browser-template.html?uid={instance('authuser')/uid}" target="_relB">relation browser</a> for my triples</p>
+        <div>
+            <b>Please regularly back up your triples file.</b>  The button below opens your triples file in another browser tab/window and you can then use File &gt; Save As... to save it as a backup to your local disk. If you need to restore from your backup file then contact <a href="mailto:peter.winstanley@gov.scot">Peter</a>
+        </div>
+        <p>
+            <xf:trigger id="download">
+                <xf:label>Download My Triples File</xf:label>
+                <xf:action ev:event="DOMActivate">
+                    <xf:load show="new">
+                        <xf:resource value="concat('/exist/rest/db/datasets/snap/data/triples/', instance('authuser')/uid, '.xml','?t=',substring(string(digest( string(random(true())), 'MD5', 'hex' )), 1, 8))"/>
+                    </xf:load>
+                </xf:action>
+            </xf:trigger>
+        </p>
+    </body>
+</html>
