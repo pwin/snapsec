@@ -98,6 +98,8 @@
                 <xf:setvalue ref="instance('triples')/uid" value="instance('authuser')/uid"/>
             </xf:action>
  -->
+            <xf:bind id="threeorless" nodeset="instance('isearch')/srch/subject" constraint="javascript:wc(.) &lt;= 3"/>
+            <xf:bind id="spotlight" nodeset="instance('isearch')/srch/object" constraint="javascript:wc2(., ../pred)"/>
         </xf:model>
         <style type="text/css">
             @namespace xf url("http://www.w3.org/2002/xforms");
@@ -168,7 +170,8 @@
            // #list {font-size: 9pt;}
                     
         </style>
-        <script type="text/javascript">      
+        <script type="text/javascript"> 
+        
         // adding a gmail style function to stop the user from moving away from the page..
         function unloadMessage(){message = "This form has not yet been submitted to the database\nAll data will be lost."
          return message;}
@@ -180,12 +183,29 @@
         function clean() {
             setBunload(false);
         }
+        
+        function wc(a){
+            //word count
+            return a.trim().split(/\s+/).length
+        }
+        
+        function wc2(a, b) {
+        //word count including exemption for 'Spotlight' predicate
+        if ((a.trim().split(/\s+/).length &lt;= 3) &amp;&amp; (b != "Spotlight")) {
+            return true
+        } else if ((a.trim().split(/\s+/).length &gt;= 1 ) &amp;&amp; (b == "Spotlight")) {
+            return true
+        }
+        else {return false}
+        }
+        
+        
         </script>
     </head>
     <body>
         <div>
             <a href="../index.html">Home</a>
-            <h3> Triples Entry Form v0.11 [2015-02-20]:  (<xf:output ref="instance('authuser')//uid"/>)</h3>
+            <h3> Triples Entry Form v0.2 [2018-08-03]:  (<xf:output ref="instance('authuser')//uid"/>)</h3>
         </div>
         <p>Please enter a subject, relationship and object in the following fields, then enter with the Add Triple button. The added items will then appear below.</p>
         <table id="inpTable">
@@ -195,6 +215,8 @@
                     <xf:input id="search" ref="instance('isearch')/srch/subject" incremental="true" delay="500">
                         <xf:label>
                             <b>Subject</b>&#160;<i>aka Thing 1</i>: </xf:label>
+                        <xf:hint>1 to 3 words</xf:hint>
+                        <xf:alert validation="threeorless">must be 1 to 3 words</xf:alert>
                         <xf:send submission="s1" ev:event="xforms-value-changed"/>
                         <xf:toggle ev:event="DOMFocusIn" case="show-autocompletion"/>
                     </xf:input>
@@ -236,6 +258,8 @@
                         <xf:label>
                             <b>Object</b>&#160;<i>aka Thing 2:</i>
                         </xf:label>
+                        <xf:hint>1 to 3 words unless you use Spotlight</xf:hint>
+                        <xf:alert validation="spotlight">over 1 to 3 words only if using Spotlight relationship</xf:alert>
                         <xf:send submission="s2" ev:event="xforms-value-changed"/>
                         <xf:toggle ev:event="DOMFocusIn" case="show-autocompletion2"/>
                     </xf:input>
